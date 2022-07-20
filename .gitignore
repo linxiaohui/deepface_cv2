@@ -1,0 +1,15 @@
+__pycache__/*
+tests/__pycache__/*
+build/
+dist/
+Pipfile
+Pipfile.lock
+.mypy_cache/
+.vscode/
+.idea/
+tests/dataset/*
+.DS_Store
+.DS_Store
+*.pyc
+*.onnx
+
