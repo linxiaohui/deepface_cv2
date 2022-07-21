@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 
 from . import preprocess
+from .models import VGGFace, OpenFace
+
 
 EMOTION_MODEL = cv2.dnn.readNetFromONNX(os.path.join(preprocess.get_deepface_home(),
                                                      "facial_expression_model.onnx"))
@@ -218,8 +220,8 @@ def find(img_path, db_path, model_name='VGG-Face', distance_metric='cosine', mod
     """
 
 
-def represent(img_path, model_name='VGG-Face', model=None, enforce_detection=True, detector_backend='opencv',
-              align=True, normalization='base'):
+def represent(img_path, model_name='VGG-Face', model=None, enforce_detection=True,
+              detector_backend='opencv', align=True, normalization='base'):
     """
     This function represents facial images as vectors.
 
@@ -236,12 +238,33 @@ def represent(img_path, model_name='VGG-Face', model=None, enforce_detection=Tru
 
         detector_backend (string): set face detector backend as retinaface, mtcnn, opencv, ssd or dlib
 
+        align:
+
         normalization (string): normalize the input image before feeding to model
 
     Returns:
         Represent function returns a multidimensional vector. The number of dimensions is changing based on the reference model. E.g. FaceNet returns 128 dimensional vector; VGG-Face returns 2622 dimensional vector.
     """
+    embeddings = []
+    if model is None:
+        if model_name == 'VGG-Face':
+            model = VGGFace
+        elif model_name == 'OpenFace':
+            model = OpenFace
+        else:
+            raise Exception("Unsupported Model")
+    input_shape_x, input_shape_y = model.input_shape
 
+    # detect and align
+    faces = preprocess.preprocess_faces(img=img_path, target_size=(input_shape_y, input_shape_x),
+                                        enforce_detection=enforce_detection,
+                                        detector_backend=detector_backend,
+                                        align=align, return_region=False)
+    for img in faces:
+        img = preprocess.normalize_input(img=img, normalization=normalization)
+        embedding = model.predict(img)[0].tolist()
+        embeddings.append(embedding)
+    return embeddings
 
 def stream(db_path='', model_name='VGG-Face', detector_backend='opencv', distance_metric='cosine',
            enable_face_analysis=True, source=0, time_threshold=5, frame_threshold=5):
