@@ -5,8 +5,7 @@ import cv2
 import numpy as np
 
 from . import preprocess
-from .models import VGGFace, OpenFace
-
+from .models import VGGFace, OpenFace, FaceNet, FaceNet512, DeepID, ArcFace
 
 EMOTION_MODEL = cv2.dnn.readNetFromONNX(os.path.join(preprocess.get_deepface_home(),
                                                      "facial_expression_model.onnx"))
@@ -250,6 +249,20 @@ def represent(img_path, model_name='VGG-Face', model=None, enforce_detection=Tru
         if model_name == 'VGG-Face':
             model = VGGFace
         elif model_name == 'OpenFace':
+            model = OpenFace
+        elif model_name == 'Facenet':
+            model = FaceNet
+        elif model_name == 'Facenet512':
+            model = FaceNet512
+        elif model_name == 'DeepFace':
+            model = OpenFace
+        elif model_name == 'DeepID':
+            model = DeepID
+        elif model_name == 'Dlib':
+            model = OpenFace
+        elif model_name == 'ArcFace':
+            model = ArcFace
+        elif model_name == 'SFace':
             model = OpenFace
         else:
             raise Exception("Unsupported Model")
